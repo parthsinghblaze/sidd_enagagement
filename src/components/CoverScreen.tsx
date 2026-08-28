@@ -266,22 +266,24 @@ export default function CoverScreen({ onOpen, guestName }: CoverScreenProps) {
   );
 }
 
-function TwinklingStars() {
-  const stars = Array.from({ length: 42 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 85,
-    size: Math.random() * 4 + 1,
-    delay: Math.random() * 4,
-    duration: Math.random() * 2.5 + 1.2,
-    shape: i % 5 === 0 ? 'star' : 'dot',
-  }));
+// Generated once at module load — stable across SSR/client
+const STARS = Array.from({ length: 42 }, (_, i) => ({
+  id: i,
+  x: (i * 7.3 + 13) % 100,                      // deterministic spread
+  y: (i * 11.7 + 5) % 85,
+  size: 1 + (i % 4),
+  delay: (i * 0.23) % 4,
+  duration: 1.2 + (i % 5) * 0.35,
+  shape: i % 5 === 0 ? 'star' : 'dot' as 'star' | 'dot',
+}));
 
+function TwinklingStars() {
   return (
-    <div className="absolute inset-0 z-10 pointer-events-none" aria-hidden="true">
-      {stars.map((star) => (
+    <div className="absolute inset-0 z-10 pointer-events-none" aria-hidden="true" suppressHydrationWarning>
+      {STARS.map((star) => (
         <div
           key={star.id}
+          suppressHydrationWarning
           style={{
             position: 'absolute',
             left: `${star.x}%`,

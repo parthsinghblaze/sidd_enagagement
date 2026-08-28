@@ -20,14 +20,15 @@ function generatePetals(count: number): Petal[] {
     'rgba(212,175,55,0.4)',
     'rgba(253,246,236,0.4)',
   ];
+  // Deterministic spread so server and client render identically
   return Array.from({ length: count }, (_, i) => ({
     id: i,
-    x: Math.random() * 100,
-    size: Math.random() * 10 + 6,
-    delay: Math.random() * 8,
-    duration: Math.random() * 10 + 10,
-    rotation: Math.random() * 360,
-    color: colors[Math.floor(Math.random() * colors.length)],
+    x: (i * 6.18 + 5) % 100,
+    size: 6 + (i % 10),
+    delay: (i * 0.53) % 8,
+    duration: 10 + (i % 10),
+    rotation: (i * 37) % 360,
+    color: colors[i % colors.length],
   }));
 }
 

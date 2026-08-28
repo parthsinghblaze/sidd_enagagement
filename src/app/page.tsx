@@ -18,22 +18,25 @@ type Stage = 'cover' | 'opening' | 'main';
 
 // Confetti burst particles on reveal
 function ConfettiBurst() {
+  const COLORS = ['#D4AF37', '#F1D9A0', '#F6DDE3', '#FFF8F0', '#D4AF37', '#E8C4D0', '#B8960C'];
+  const SHAPES = ['circle', 'rect', 'diamond'] as const;
   const particles = Array.from({ length: 70 }, (_, i) => ({
     id: i,
-    x: 5 + Math.random() * 90,
-    color: ['#D4AF37', '#F1D9A0', '#F6DDE3', '#FFF8F0', '#D4AF37', '#E8C4D0', '#B8960C'][Math.floor(Math.random() * 7)],
-    duration: 1.8 + Math.random() * 2,
-    delay: Math.random() * 0.8,
-    rotate: Math.random() * 900,
-    size: 4 + Math.random() * 8,
-    shape: i % 3 === 0 ? 'circle' : i % 3 === 1 ? 'rect' : 'diamond',
+    x: 5 + (i * 1.31) % 90,
+    color: COLORS[i % COLORS.length],
+    duration: 1.8 + (i % 5) * 0.4,
+    delay: (i * 0.113) % 0.8,
+    rotate: (i * 47) % 900,
+    size: 4 + (i % 8),
+    shape: SHAPES[i % 3],
   }));
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-40 overflow-hidden" aria-hidden="true">
+    <div className="pointer-events-none fixed inset-0 z-40 overflow-hidden" aria-hidden="true" suppressHydrationWarning>
       {particles.map((p) => (
         <div
           key={p.id}
+          suppressHydrationWarning
           style={{
             position: 'absolute',
             left: `${p.x}%`,

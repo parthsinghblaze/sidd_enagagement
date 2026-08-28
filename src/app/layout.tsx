@@ -48,8 +48,9 @@ export const metadata: Metadata = {
   description: "Together with their families, Siddharth & Khushi invite you to celebrate their engagement. A premium digital invitation.",
   openGraph: {
     title: "Siddharth & Khushi — Engagement 💍",
-    description: "You're invited to celebrate our engagement!",
+    description: "You're invited to celebrate our engagement! Sunday, 7th December 2026 · Atithi Restaurant and Banquet, Vapi",
     type: "website",
+    images: [{ url: '/favicon.png', width: 512, height: 512, alt: 'Engagement Ring' }],
   },
 };
 
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`
         ${cormorant.variable}
         ${greatVibes.variable}
@@ -66,7 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         h-full
       `}
     >
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full" suppressHydrationWarning>{children}</body>
     </html>
   );
 }
