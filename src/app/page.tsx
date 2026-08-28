@@ -1,7 +1,6 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -11,30 +10,23 @@ import FloatingPetals from '@/components/FloatingPetals';
 import InvitationText from '@/components/InvitationText';
 import VenueDetails from '@/components/VenueDetails';
 import MusicPlayer from '@/components/MusicPlayer';
+import RingsIllustration from '@/components/RingsIllustration';
 
-// Lazy-load the 3D ring scene (Three.js is heavy — only load after card opens)
-const RingScene = dynamic(() => import('@/components/RingScene'), {
-  ssr: false,
-  loading: () => (
-    <div
-      className="w-full flex items-center justify-center skeleton rounded-full mx-auto"
-      style={{ height: 280, maxWidth: 280 }}
-    />
-  ),
-});
+
 
 type Stage = 'cover' | 'opening' | 'main';
 
-// Confetti burst particles on ring reveal
+// Confetti burst particles on reveal
 function ConfettiBurst() {
-  const particles = Array.from({ length: 30 }, (_, i) => ({
+  const particles = Array.from({ length: 70 }, (_, i) => ({
     id: i,
-    x: 30 + Math.random() * 40,
-    color: ['#D4AF37', '#F1D9A0', '#F6DDE3', '#FFF8F0', '#D4AF37'][Math.floor(Math.random() * 5)],
-    duration: 1.5 + Math.random() * 1.5,
-    delay: Math.random() * 0.5,
-    rotate: Math.random() * 720,
-    size: 4 + Math.random() * 6,
+    x: 5 + Math.random() * 90,
+    color: ['#D4AF37', '#F1D9A0', '#F6DDE3', '#FFF8F0', '#D4AF37', '#E8C4D0', '#B8960C'][Math.floor(Math.random() * 7)],
+    duration: 1.8 + Math.random() * 2,
+    delay: Math.random() * 0.8,
+    rotate: Math.random() * 900,
+    size: 4 + Math.random() * 8,
+    shape: i % 3 === 0 ? 'circle' : i % 3 === 1 ? 'rect' : 'diamond',
   }));
 
   return (
@@ -46,9 +38,9 @@ function ConfettiBurst() {
             position: 'absolute',
             left: `${p.x}%`,
             top: '-10px',
-            width: p.size,
-            height: p.size * 0.4,
-            borderRadius: 2,
+            width: p.shape === 'circle' ? p.size : p.size * 0.6,
+            height: p.shape === 'circle' ? p.size : p.size * (p.shape === 'rect' ? 0.35 : 0.6),
+            borderRadius: p.shape === 'circle' ? '50%' : p.shape === 'diamond' ? '2px' : 3,
             background: p.color,
             animationName: 'confetti-fall',
             animationDuration: `${p.duration}s`,
@@ -56,6 +48,7 @@ function ConfettiBurst() {
             animationTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
             animationFillMode: 'forwards',
             transform: `rotate(${p.rotate}deg)`,
+            boxShadow: `0 0 ${p.size}px ${p.color}66`,
           }}
         />
       ))}
@@ -110,8 +103,10 @@ export default function InvitationPage() {
   const [stage, setStage] = useState<Stage>('cover');
   const [showConfetti, setShowConfetti] = useState(false);
   const [coverTapped, setCoverTapped] = useState(false);
+  const [cardOpened, setCardOpened] = useState(false);
   const [guestName, setGuestName] = useState<string | null>(null);
   const mainRef = useRef<HTMLDivElement>(null);
+
 
   // Read ?to= query param for guest personalization
   useEffect(() => {
@@ -127,8 +122,9 @@ export default function InvitationPage() {
 
   const handleTransitionComplete = () => {
     setStage('main');
+    setCardOpened(true);
     setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 3000);
+    setTimeout(() => setShowConfetti(false), 4000);
   };
 
   return (
@@ -148,8 +144,8 @@ export default function InvitationPage() {
           <LanguageSwitcher />
         </div>
 
-        {/* Music player — always present after first tap */}
-        <MusicPlayer triggerPlay={coverTapped} />
+        {/* Music player — auto-starts when card opens */}
+        <MusicPlayer triggerPlay={coverTapped} autoPlay={cardOpened} />
 
         {/* ── STAGE: COVER ── */}
         <AnimatePresence mode="wait">
@@ -177,7 +173,7 @@ export default function InvitationPage() {
           {stage === 'main' && (
             <motion.div
               key="main"
-              className="w-full min-h-screen flex flex-col items-center"
+              className="w-full min-h-screen flex flex-col"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8 }}
@@ -186,23 +182,21 @@ export default function InvitationPage() {
               {/* Guest name banner */}
               {guestName && <GuestBanner name={guestName} />}
 
-              {/* Ring scene */}
-              <div className="w-full max-w-lg mx-auto mt-10">
-                <RingScene />
+              {/* Engagement rings illustration */}
+              <div className="w-full" style={{ maxWidth: 420, margin: '32px auto 0' }}>
+                <RingsIllustration />
               </div>
 
               {/* Invitation text (stagger reveal) */}
-              <div className="w-full max-w-lg mx-auto">
+              <div className="w-full" style={{ maxWidth: 520, margin: '0 auto' }}>
                 <InvitationText />
               </div>
 
               {/* Ornamental divider */}
-              <div className="w-full max-w-lg mx-auto px-8 mb-10">
-                <div className="ornamental-divider" />
-              </div>
+              <div className="w-full ornamental-divider" style={{ maxWidth: 480, margin: '0 auto 40px', padding: '0 32px' }} />
 
-              {/* Venue details */}
-              <div className="w-full max-w-lg mx-auto">
+              {/* Venue details — full width, self-centering */}
+              <div className="w-full">
                 <VenueDetails />
               </div>
             </motion.div>

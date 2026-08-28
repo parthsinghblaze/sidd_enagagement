@@ -54,6 +54,44 @@ function MandalaCorner({ flip = false }: { flip?: boolean }) {
 interface CoverScreenProps {
   onOpen: () => void;
   guestName?: string;
+  onChime?: () => void;
+}
+
+// Web Audio chime — plays a pleasant sparkle arpeggio on tap
+function playChime() {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51]; // C5 E5 G5 C6 E6
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const t0 = ctx.currentTime + i * 0.1;
+      gain.gain.setValueAtTime(0, t0);
+      gain.gain.linearRampToValueAtTime(0.22, t0 + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.9);
+      osc.start(t0);
+      osc.stop(t0 + 0.9);
+    });
+    // Closing bell chord
+    [523.25, 659.25, 783.99].forEach((freq) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const t0 = ctx.currentTime + notes.length * 0.1 + 0.05;
+      gain.gain.setValueAtTime(0, t0);
+      gain.gain.linearRampToValueAtTime(0.15, t0 + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + 1.4);
+      osc.start(t0);
+      osc.stop(t0 + 1.4);
+    });
+  } catch { /* ignore if Web Audio not available */ }
 }
 
 export default function CoverScreen({ onOpen, guestName }: CoverScreenProps) {
@@ -62,6 +100,11 @@ export default function CoverScreen({ onOpen, guestName }: CoverScreenProps) {
   const fontClass =
     lang === 'hi' ? 'font-devanagari' :
     lang === 'gu' ? 'font-gujarati' : 'font-body';
+
+  const handleTap = () => {
+    playChime();
+    onOpen();
+  };
 
   return (
     <motion.div
@@ -166,39 +209,47 @@ export default function CoverScreen({ onOpen, guestName }: CoverScreenProps) {
         {/* Divider */}
         <div className="ornamental-divider w-48 mx-auto" />
 
-        {/* Tap to open CTA */}
+        {/* Tap to open CTA — clean gold pill button */}
         <motion.button
           id="tap-to-open-btn"
-          onClick={onOpen}
-          className={`${fontClass} relative flex flex-col items-center gap-2 group`}
+          onClick={handleTap}
+          className={`${fontClass} relative`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.1, duration: 0.7 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.94 }}
           aria-label="Open the invitation"
+          style={{ minHeight: 52, minWidth: 200 }}
         >
-          {/* Pulsing gold ring around the button */}
-          <motion.div
+          {/* Outer pulse ring */}
+          <motion.span
             className="absolute inset-0 rounded-full pointer-events-none"
-            style={{ border: '1.5px solid rgba(212,175,55,0.5)', borderRadius: '50px' }}
-            animate={{ scale: [1, 1.15, 1], opacity: [0.7, 0, 0.7] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ border: '1px solid rgba(212,175,55,0.55)' }}
+            animate={{ scale: [1, 1.18, 1], opacity: [0.6, 0, 0.6] }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
           />
-          <div
-            className="px-8 py-4 rounded-full gold-border animate-text-glow"
+          {/* Button surface */}
+          <span
+            className="flex items-center justify-center gap-2 rounded-full animate-text-glow"
             style={{
-              background: 'rgba(122,31,43,0.4)',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(212,175,55,0.45)',
-              letterSpacing: '0.12em',
-              fontSize: 'clamp(0.75rem, 3vw, 0.9rem)',
+              padding: '14px 40px',
+              background: 'rgba(26,8,16,0.55)',
+              backdropFilter: 'blur(12px)',
+              border: '1.5px solid rgba(212,175,55,0.5)',
+              boxShadow: '0 0 24px rgba(212,175,55,0.12), inset 0 0 12px rgba(212,175,55,0.05)',
               color: 'var(--color-gold-light)',
+              letterSpacing: '0.18em',
+              fontSize: 'clamp(0.7rem, 2.8vw, 0.82rem)',
               textTransform: 'uppercase',
               fontWeight: 500,
+              whiteSpace: 'nowrap',
             }}
           >
+            <span style={{ fontSize: '0.9em', opacity: 0.8 }}>✦</span>
             {t('tap_to_open')}
-          </div>
+            <span style={{ fontSize: '0.9em', opacity: 0.8 }}>✦</span>
+          </span>
         </motion.button>
       </div>
 
@@ -216,13 +267,14 @@ export default function CoverScreen({ onOpen, guestName }: CoverScreenProps) {
 }
 
 function TwinklingStars() {
-  const stars = Array.from({ length: 20 }, (_, i) => ({
+  const stars = Array.from({ length: 42 }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
-    y: Math.random() * 80,
-    size: Math.random() * 3 + 1,
-    delay: Math.random() * 3,
-    duration: Math.random() * 2 + 1.5,
+    y: Math.random() * 85,
+    size: Math.random() * 4 + 1,
+    delay: Math.random() * 4,
+    duration: Math.random() * 2.5 + 1.2,
+    shape: i % 5 === 0 ? 'star' : 'dot',
   }));
 
   return (
@@ -236,8 +288,11 @@ function TwinklingStars() {
             top: `${star.y}%`,
             width: star.size,
             height: star.size,
-            borderRadius: '50%',
-            background: '#F1D9A0',
+            borderRadius: star.shape === 'star' ? '2px' : '50%',
+            background: star.shape === 'star'
+              ? 'linear-gradient(45deg, #D4AF37, #F1D9A0)'
+              : '#F1D9A0',
+            transform: star.shape === 'star' ? 'rotate(45deg)' : undefined,
             animationName: 'twinkling',
             animationDuration: `${star.duration}s`,
             animationDelay: `${star.delay}s`,

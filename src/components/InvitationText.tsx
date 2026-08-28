@@ -127,7 +127,7 @@ export default function InvitationText() {
 
       {/* Decorative rings emoji accent */}
       <motion.p
-        style={{ fontSize: '1.5rem', letterSpacing: '0.4em' }}
+        style={{ fontSize: '1.5rem', letterSpacing: '0.4em', marginTop: 8, marginBottom: 40 }}
         variants={lineVariants}
         aria-hidden="true"
       >
