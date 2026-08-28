@@ -113,7 +113,7 @@ export default function InvitationText() {
 
       {/* Invite line */}
       <motion.p
-        className={`${scriptClass} max-w-xs`}
+        className={`${scriptClass} max-w-sm`}
         style={{
           fontSize: 'clamp(0.9rem, 3.5vw, 1.1rem)',
           color: 'rgba(253,246,236,0.85)',

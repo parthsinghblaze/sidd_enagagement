@@ -44,11 +44,20 @@ const notoGujarati = Noto_Sans_Gujarati({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: "Siddharth & Khushi — Engagement Invitation",
-  description: "Together with their families, Siddharth & Khushi invite you to celebrate their engagement. A premium digital invitation.",
+  description: "Singh Family warmly invites you to celebrate the engagement of Siddharth & Khushi.",
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/favicon.png',
+  },
   openGraph: {
     title: "Siddharth & Khushi — Engagement 💍",
-    description: "You're invited to celebrate our engagement! Sunday, 7th December 2026 · Atithi Restaurant and Banquet, Vapi",
+    description: "Singh Family invites you to celebrate the engagement of Siddharth & Khushi! Sunday, 7th December 2026 · Atithi Restaurant and Banquet, Vapi",
     type: "website",
     images: [{ url: '/favicon.png', width: 512, height: 512, alt: 'Engagement Ring' }],
   },
