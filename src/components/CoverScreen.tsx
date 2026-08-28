@@ -4,24 +4,60 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-// Gold wax seal SVG
-function GoldSeal() {
+
+
+// Traditional Auspicious Gold Ganesha Motif
+function GoldGaneshaMotif() {
   return (
-    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="40" cy="40" r="38" fill="#7A1F2B" stroke="#D4AF37" strokeWidth="1.5" />
-      <circle cx="40" cy="40" r="30" fill="none" stroke="#D4AF37" strokeWidth="0.5" strokeDasharray="3 2" />
-      {/* Star points */}
-      {Array.from({ length: 8 }).map((_, i) => {
-        const angle = (i * Math.PI * 2) / 8 - Math.PI / 2;
-        const x1 = 40 + 38 * Math.cos(angle);
-        const y1 = 40 + 38 * Math.sin(angle);
-        const x2 = 40 + 30 * Math.cos(angle + Math.PI / 8);
-        const y2 = 40 + 30 * Math.sin(angle + Math.PI / 8);
-        return <line key={i} x1={40} y1={40} x2={x1} y2={y1} stroke="#D4AF37" strokeWidth="0.5" opacity="0.5" />;
+    <svg width="68" height="68" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Auspicious Lord Ganesha Motif">
+      <defs>
+        <linearGradient id="ganeshaGold" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#997008" />
+          <stop offset="30%" stopColor="#D4AF37" />
+          <stop offset="60%" stopColor="#FFF2B2" />
+          <stop offset="100%" stopColor="#D4AF37" />
+        </linearGradient>
+        <filter id="ganeshaGlow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
+      {/* Sunburst rays */}
+      {Array.from({ length: 12 }).map((_, i) => {
+        const angle = (i * Math.PI * 2) / 12;
+        const x1 = 40 + 36 * Math.cos(angle);
+        const y1 = 40 + 36 * Math.sin(angle);
+        const x2 = 40 + 32 * Math.cos(angle);
+        const y2 = 40 + 32 * Math.sin(angle);
+        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="url(#ganeshaGold)" strokeWidth="0.8" opacity="0.5" />;
       })}
-      {/* S&K monogram */}
-      <text x="40" y="37" textAnchor="middle" fontSize="11" fill="#D4AF37" fontFamily="Georgia, serif" fontStyle="italic">S & K</text>
-      <text x="40" y="51" textAnchor="middle" fontSize="6" fill="#D4AF37" fontFamily="Georgia, serif" letterSpacing="2">ENGAGEMENT</text>
+
+      {/* Outer halo circle */}
+      <circle cx="40" cy="40" r="32" fill="none" stroke="url(#ganeshaGold)" strokeWidth="0.8" strokeDasharray="3 2" opacity="0.6" />
+
+      {/* Lord Ganesha Minimal Line Art */}
+      <g stroke="url(#ganeshaGold)" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" filter="url(#ganeshaGlow)">
+        {/* Crown Mukut */}
+        <path d="M35,18 L40,12 L45,18 Z" fill="url(#ganeshaGold)" stroke="none" />
+        <line x1="33" y1="20" x2="47" y2="20" strokeWidth="1.2" />
+
+        {/* Head & Large Ears */}
+        <path d="M26,24 C32,21 48,21 54,24 C57,28 54,34 49,34 C44,34 44,28 40,28 C36,28 36,34 31,34 C26,34 23,28 26,24 Z" />
+
+        {/* Trunk (Trunk turning right/left gracefully) */}
+        <path d="M40,28 C40,40 47,44 45,49 C43,53 37,51 36,47" strokeWidth="1.8" />
+
+        {/* Red/Gold Tilak on forehead */}
+        <path d="M38,22 Q40,19 42,22" stroke="#E11D48" strokeWidth="1.5" />
+        <circle cx="40" cy="24" r="1" fill="#FFF2B2" stroke="none" />
+
+        {/* Modak in trunk curve */}
+        <circle cx="34" cy="46" r="1.5" fill="url(#ganeshaGold)" stroke="none" />
+      </g>
     </svg>
   );
 }
@@ -177,29 +213,39 @@ export default function CoverScreen({ onOpen, guestName }: CoverScreenProps) {
           </motion.p>
         )}
 
-        {/* Gold seal + names */}
+        {/* Auspicious Lord Ganesha Gold Motif */}
         <motion.div
-          className="flex flex-col items-center gap-4"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.7, duration: 0.9, type: 'spring', stiffness: 100 }}
+          transition={{ delay: 0.5, duration: 0.8, type: 'spring' }}
+          className="my-1 flex justify-center"
         >
-          <div className="animate-pulse-glow rounded-full">
-            <GoldSeal />
-          </div>
-          <div className="text-center">
+          <GoldGaneshaMotif />
+        </motion.div>
+
+        {/* Couple names — luxury typography */}
+        <motion.div
+          className="flex flex-col items-center gap-3 my-2"
+          initial={{ opacity: 0, scale: 0.88 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.7, duration: 0.9, type: 'spring', stiffness: 90 }}
+        >
+          <div className="text-center flex flex-col items-center">
             <h1
-              className="font-serif text-gold-shimmer"
-              style={{ fontSize: 'clamp(2.5rem, 10vw, 4.5rem)', fontWeight: 600, lineHeight: 1.1 }}
+              className="font-serif text-gold-shimmer tracking-tight"
+              style={{ fontSize: 'clamp(2.8rem, 11vw, 5.2rem)', fontWeight: 600, lineHeight: 1.05 }}
             >
               {t('groom_name')}
             </h1>
-            <p className="font-script" style={{ fontSize: 'clamp(1.4rem, 5vw, 2.2rem)', color: 'var(--color-gold-light)', margin: '4px 0' }}>
+            <p
+              className="font-script my-1"
+              style={{ fontSize: 'clamp(1.8rem, 7vw, 2.8rem)', color: 'var(--color-gold-light)', lineHeight: 1 }}
+            >
               &amp;
             </p>
             <h1
-              className="font-serif text-gold-shimmer"
-              style={{ fontSize: 'clamp(2.5rem, 10vw, 4.5rem)', fontWeight: 600, lineHeight: 1.1 }}
+              className="font-serif text-gold-shimmer tracking-tight"
+              style={{ fontSize: 'clamp(2.8rem, 11vw, 5.2rem)', fontWeight: 600, lineHeight: 1.05 }}
             >
               {t('bride_name')}
             </h1>
