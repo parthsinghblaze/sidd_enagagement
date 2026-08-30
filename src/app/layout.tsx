@@ -3,8 +3,8 @@ import {
   Cormorant_Garamond,
   Great_Vibes,
   Poppins,
-  Noto_Sans_Devanagari,
-  Noto_Sans_Gujarati,
+  Noto_Serif_Devanagari,
+  Hind_Vadodara,
 } from 'next/font/google';
 import './globals.css';
 
@@ -29,14 +29,14 @@ const poppins = Poppins({
   display: 'swap',
 });
 
-const notoDevanagari = Noto_Sans_Devanagari({
+const notoDevanagari = Noto_Serif_Devanagari({
   variable: '--font-noto-devanagari',
   subsets: ['devanagari'],
   weight: ['400', '500', '700'],
   display: 'swap',
 });
 
-const notoGujarati = Noto_Sans_Gujarati({
+const notoGujarati = Hind_Vadodara({
   variable: '--font-noto-gujarati',
   subsets: ['gujarati'],
   weight: ['400', '500', '700'],
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Siddharth & Khushi — Engagement 💍",
-    description: "Singh Family invites you to celebrate the engagement of Siddharth & Khushi! Sunday, 7th December 2026 · Atithi Restaurant and Banquet, Vapi",
+    description: "Singh Family invites you to celebrate the engagement of Siddharth & Khushi! Monday, 7th December 2026 · Atithi Restaurant and Banquet, Vapi",
     type: "website",
     images: [{ url: '/favicon.png', width: 512, height: 512, alt: 'Engagement Ring' }],
   },

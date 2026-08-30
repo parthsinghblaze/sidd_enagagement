@@ -145,6 +145,11 @@ export default function CoverScreen({ onOpen, guestName }: CoverScreenProps) {
     lang === 'hi' ? 'font-devanagari' :
     lang === 'gu' ? 'font-gujarati' : 'font-body';
 
+  const isIndic   = lang === 'hi' || lang === 'gu';
+  const nameClass = isIndic ? fontClass : 'font-serif text-gold-shimmer tracking-tight';
+  const nameLineH = isIndic ? 1.5 : 1.05;
+  const nameFontW = isIndic ? 500 : 600;
+
   const handleTap = () => {
     playChime();
     onOpen();
@@ -240,8 +245,8 @@ export default function CoverScreen({ onOpen, guestName }: CoverScreenProps) {
         >
           <div className="text-center flex flex-col items-center">
             <h1
-              className="font-serif text-gold-shimmer tracking-tight"
-              style={{ fontSize: 'clamp(2.8rem, 11vw, 5.2rem)', fontWeight: 600, lineHeight: 1.05 }}
+              className={nameClass}
+              style={{ fontSize: 'clamp(2.8rem, 11vw, 5.2rem)', fontWeight: nameFontW, lineHeight: nameLineH }}
             >
               {t('groom_name')}
             </h1>
@@ -252,8 +257,8 @@ export default function CoverScreen({ onOpen, guestName }: CoverScreenProps) {
               &amp;
             </p>
             <h1
-              className="font-serif text-gold-shimmer tracking-tight"
-              style={{ fontSize: 'clamp(2.8rem, 11vw, 5.2rem)', fontWeight: 600, lineHeight: 1.05 }}
+              className={nameClass}
+              style={{ fontSize: 'clamp(2.8rem, 11vw, 5.2rem)', fontWeight: nameFontW, lineHeight: nameLineH }}
             >
               {t('bride_name')}
             </h1>

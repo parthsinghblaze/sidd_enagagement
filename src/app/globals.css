@@ -52,8 +52,25 @@ body {
 .font-serif       { font-family: var(--font-serif); }
 .font-script      { font-family: var(--font-script); }
 .font-body        { font-family: var(--font-body); }
-.font-devanagari  { font-family: var(--font-devanagari); }
-.font-gujarati    { font-family: var(--font-gujarati); }
+
+/* Indic scripts need generous line-height so top/bottom matras don't clip */
+.font-devanagari  {
+  font-family: var(--font-devanagari);
+  line-height: 1.75;
+  word-spacing: 0.04em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+.font-gujarati    {
+  font-family: var(--font-gujarati);
+  line-height: 1.75;
+  word-spacing: 0.04em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
 
 /* ============================================================
    GOLD SHIMMER TEXT

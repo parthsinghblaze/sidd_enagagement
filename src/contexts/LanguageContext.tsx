@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import en from '@/locales/en.json';
 import hi from '@/locales/hi.json';
 import gu from '@/locales/gu.json';
@@ -21,10 +21,7 @@ const LanguageContext = createContext<LanguageContextType | null>(null);
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Lang>('en');
 
-  useEffect(() => {
-    const stored = localStorage.getItem('sidd_lang') as Lang | null;
-    if (stored && ['en', 'hi', 'gu'].includes(stored)) setLangState(stored);
-  }, []);
+  // Always default to English on load — user can switch via dropdown
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);

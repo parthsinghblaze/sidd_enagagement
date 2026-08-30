@@ -21,46 +21,48 @@ function ScrollDownHint({ visible }: { visible: boolean }) {
   return (
     <AnimatePresence>
       {visible && (
-        <motion.div
-          key="scroll-hint"
-          className="fixed bottom-6 left-1/2 z-50 flex flex-col items-center gap-1 pointer-events-none"
-          style={{ transform: 'translateX(-50%)' }}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 10 }}
-          transition={{ duration: 0.5 }}
-        >
+        // Full-width fixed wrapper so justify-center works reliably
+        <div className="fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
           <motion.div
+            key="scroll-hint"
             className="flex flex-col items-center gap-1"
-            animate={{ y: [0, 7, 0] }}
-            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.5 }}
           >
-            <span
-              style={{
-                fontSize: '0.52rem',
-                letterSpacing: '0.22em',
-                textTransform: 'uppercase',
-                color: 'rgba(212,175,55,0.55)',
-                fontFamily: 'inherit',
-              }}
+            <motion.div
+              className="flex flex-col items-center gap-1"
+              animate={{ y: [0, 7, 0] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
             >
-              scroll
-            </span>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-              stroke="rgba(212,175,55,0.75)" strokeWidth="1.6"
-              strokeLinecap="round" strokeLinejoin="round"
-            >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-              stroke="rgba(212,175,55,0.3)" strokeWidth="1.6"
-              strokeLinecap="round" strokeLinejoin="round"
-              style={{ marginTop: -10 }}
-            >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
+              <span
+                style={{
+                  fontSize: '0.52rem',
+                  letterSpacing: '0.22em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(212,175,55,0.55)',
+                  fontFamily: 'inherit',
+                }}
+              >
+                scroll
+              </span>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                stroke="rgba(212,175,55,0.75)" strokeWidth="1.6"
+                strokeLinecap="round" strokeLinejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                stroke="rgba(212,175,55,0.3)" strokeWidth="1.6"
+                strokeLinecap="round" strokeLinejoin="round"
+                style={{ marginTop: -10 }}
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </motion.div>
           </motion.div>
-        </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );

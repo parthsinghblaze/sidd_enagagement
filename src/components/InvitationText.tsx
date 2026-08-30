@@ -41,9 +41,14 @@ function FloralDivider() {
 export default function InvitationText() {
   const { t, lang } = useLanguage();
 
-  const isHindi = lang === 'hi';
-  const isGujarati = lang === 'gu';
+  const isHindi    = lang === 'hi';
+  const isGujarati  = lang === 'gu';
+  const isIndic     = isHindi || isGujarati;
   const scriptClass = isHindi ? 'font-devanagari' : isGujarati ? 'font-gujarati' : 'font-body';
+  // Indic names need the script font + more vertical room for matras
+  const nameClass   = isIndic ? scriptClass : 'font-serif text-gold-shimmer';
+  const nameLineH   = isIndic ? 1.5 : 1;
+  const nameFontW   = isIndic ? 500 : 600;
 
   return (
     <motion.div
@@ -72,11 +77,11 @@ export default function InvitationText() {
       {/* Couple names */}
       <motion.div className="flex flex-col items-center gap-1" variants={lineVariants}>
         <h1
-          className="font-serif text-gold-shimmer"
+          className={`${nameClass}`}
           style={{
             fontSize: 'clamp(3rem, 13vw, 5.5rem)',
-            fontWeight: 600,
-            lineHeight: 1,
+            fontWeight: nameFontW,
+            lineHeight: nameLineH,
             letterSpacing: '-0.01em',
           }}
         >
@@ -95,11 +100,11 @@ export default function InvitationText() {
         </p>
 
         <h1
-          className="font-serif text-gold-shimmer"
+          className={`${nameClass}`}
           style={{
             fontSize: 'clamp(3rem, 13vw, 5.5rem)',
-            fontWeight: 600,
-            lineHeight: 1,
+            fontWeight: nameFontW,
+            lineHeight: nameLineH,
             letterSpacing: '-0.01em',
           }}
         >
