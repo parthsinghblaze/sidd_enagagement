@@ -1,164 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
-
-// ─────────────────────────────────────────────
-// SYNTHESIZED INDIAN AMBIENT MUSIC ENGINE
-// Raga Yaman — the classical romantic raga
-// Drone (tanpura) + melodic phrases + reverb
-// ─────────────────────────────────────────────
-function createIndianSynth() {
-  const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-  const ctx = new AudioCtx() as AudioContext;
-
-  // Master output with soft gain
-  const master = ctx.createGain();
-  master.gain.value = 0.55;
-  master.connect(ctx.destination);
-
-  // Pseudo-reverb via feedback delay
-  const delay = ctx.createDelay(2.5);
-  delay.delayTime.value = 0.38;
-  const delayFeed = ctx.createGain();
-  delayFeed.gain.value = 0.28;
-  const delayOut = ctx.createGain();
-  delayOut.gain.value = 0.22;
-  delay.connect(delayFeed);
-  delayFeed.connect(delay);
-  delay.connect(delayOut);
-  delayOut.connect(master);
-
-  // High-pass to keep reverb tail clean
-  const hp = ctx.createBiquadFilter();
-  hp.type = 'highpass';
-  hp.frequency.value = 80;
-  delayOut.connect(hp);
-  hp.connect(master);
-
-  // ── Tanpura drone (Sa + Pa) ──
-  const droneNodes: AudioNode[] = [];
-  const droneData: [number, number, OscillatorType][] = [
-    [130.81, 0.055, 'sawtooth'],   // C3 (low Sa)
-    [196.00, 0.048, 'sawtooth'],   // G3 (Pa)
-    [261.63, 0.042, 'sawtooth'],   // C4 (mid Sa)
-    [392.00, 0.028, 'sawtooth'],   // G4 (high Pa)
-  ];
-
-  droneData.forEach(([freq, vol, type]) => {
-    // Slightly detune two oscillators for richness
-    [-2, 0, 2].forEach((cent) => {
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
-      osc.type = type;
-      osc.frequency.value = freq * Math.pow(2, cent / 1200);
-      g.gain.value = vol / 3;
-      osc.connect(g);
-      g.connect(master);
-      g.connect(delay);
-      osc.start();
-      droneNodes.push(osc, g);
-    });
-  });
-
-  // ── Raga Yaman scale (Lydian ≈ romantic, uplifting) ──
-  // C  D  E  F#  G  A  B  C5
-  const scale = [261.63, 293.66, 329.63, 369.99, 392.00, 440.00, 493.88, 523.25];
-
-  // Melodic phrases — index into scale[]
-  const phrases = [
-    [0, 2, 4, 6, 7, 6, 4, 2],       // ascending phrase (Aaroh)
-    [7, 5, 4, 2, 1, 0, 2, 4],       // descending phrase (Avaroh)
-    [4, 6, 7, 6, 4, 5, 4, 2],       // Gandhar-Nishad flourish
-    [2, 4, 6, 7, 6, 4, 2, 0],       // Rishabh phrase
-    [0, 2, 4, 6, 7, 4, 2, 4, 6, 7], // longer pakad
-    [7, 6, 4, 6, 7, 5, 4, 2, 0],    // calm descent
-  ];
-
-  let phraseIdx = 0;
-  let noteIdx = 0;
-  let nextNoteTime = 0;
-  const NOTE_GAP = 0.78; // seconds between notes
-  let schedulerTimer: ReturnType<typeof setTimeout> | null = null;
-  let running = false;
-
-  function scheduleNotes() {
-    const LOOKAHEAD = 0.25; // schedule 250ms ahead
-    while (nextNoteTime < ctx.currentTime + LOOKAHEAD) {
-      const phrase = phrases[phraseIdx % phrases.length];
-      const scaleIdx = phrase[noteIdx % phrase.length];
-      const baseFreq = scale[scaleIdx];
-
-      // Occasional octave variation for texture
-      const octave = noteIdx % 11 === 0 ? 0.5 : noteIdx % 7 === 0 ? 2 : 1;
-      const freq = baseFreq * octave;
-
-      // Sitar-like timbre: triangle + sawtooth blend
-      ['triangle' as OscillatorType, 'sawtooth' as OscillatorType].forEach((type, ti) => {
-        const osc = ctx.createOscillator();
-        const g = ctx.createGain();
-        osc.type = type;
-        osc.frequency.value = freq;
-        const vol = type === 'triangle' ? 0.09 : 0.025;
-        g.gain.setValueAtTime(0, nextNoteTime);
-        g.gain.linearRampToValueAtTime(vol, nextNoteTime + 0.06);
-        g.gain.setValueAtTime(vol * 0.75, nextNoteTime + 0.22);
-        g.gain.exponentialRampToValueAtTime(0.0001, nextNoteTime + NOTE_GAP * 0.88);
-        osc.connect(g);
-        g.connect(master);
-        if (ti === 0) g.connect(delay); // only send main osc to reverb
-        osc.start(nextNoteTime);
-        osc.stop(nextNoteTime + NOTE_GAP);
-      });
-
-      noteIdx++;
-      if (noteIdx > 0 && noteIdx % phrase.length === 0) {
-        phraseIdx++;
-        noteIdx = 0;
-        nextNoteTime += NOTE_GAP * 0.6; // breath/pause between phrases
-      }
-      nextNoteTime += NOTE_GAP;
-    }
-
-    schedulerTimer = setTimeout(scheduleNotes, 120);
-  }
-
-  return {
-    play() {
-      if (!running) {
-        if (ctx.state === 'suspended') ctx.resume();
-        running = true;
-        nextNoteTime = ctx.currentTime + 0.4;
-        scheduleNotes();
-      }
-    },
-    pause() {
-      running = false;
-      if (schedulerTimer) clearTimeout(schedulerTimer);
-      ctx.suspend();
-    },
-    resume() {
-      if (!running) {
-        ctx.resume();
-        running = true;
-        nextNoteTime = ctx.currentTime + 0.2;
-        scheduleNotes();
-      }
-    },
-    get isRunning() {
-      return running;
-    },
-    destroy() {
-      running = false;
-      if (schedulerTimer) clearTimeout(schedulerTimer);
-      droneNodes.forEach((n) => {
-        try { (n as OscillatorNode).stop?.(); } catch { /* noop */ }
-      });
-      ctx.close();
-    },
-  };
-}
 
 // ─────────────────────────────────────────────
 // SOUND WAVE BARS UI
@@ -193,6 +37,7 @@ function SoundWave({ isPlaying }: { isPlaying: boolean }) {
 
 // ─────────────────────────────────────────────
 // MUSIC PLAYER COMPONENT
+// Uses bollywood.mp3 with looping support
 // ─────────────────────────────────────────────
 export default function MusicPlayer({
   triggerPlay,
@@ -203,63 +48,56 @@ export default function MusicPlayer({
 }) {
   const { t } = useLanguage();
   const [isPlaying, setIsPlaying] = useState(false);
-  const synthRef = useRef<ReturnType<typeof createIndianSynth> | null>(null);
-  const initializedRef = useRef(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const hasStartedRef = useRef(false);
 
-  // Initialize synth after first user interaction
-  const initSynth = useCallback(() => {
-    if (initializedRef.current) return;
-    initializedRef.current = true;
-    try {
-      synthRef.current = createIndianSynth();
-    } catch {
-      // Web Audio not available
-    }
-  }, []);
-
-  // Initialize on cover tap
+  // Create audio element once on mount
   useEffect(() => {
-    if (triggerPlay && !initializedRef.current) {
-      initSynth();
-    }
-  }, [triggerPlay, initSynth]);
+    const audio = new Audio('/audio/bollywood.mp3');
+    audio.loop = true;       // loop infinitely
+    audio.volume = 0.75;
+    audio.preload = 'auto';
 
-  // Auto-play when card opens
-  useEffect(() => {
-    if (!autoPlay) return;
-    const timer = setTimeout(() => {
-      if (!synthRef.current) initSynth();
-      setTimeout(() => {
-        synthRef.current?.play();
-        setIsPlaying(true);
-      }, 200);
-    }, 600); // slight delay so confetti lands first
-    return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoPlay]);
+    audio.addEventListener('play', () => setIsPlaying(true));
+    audio.addEventListener('pause', () => setIsPlaying(false));
+    audio.addEventListener('ended', () => {
+      // Shouldn't fire since loop=true, but just in case
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    });
 
-  // Cleanup
-  useEffect(() => {
+    audioRef.current = audio;
+
     return () => {
-      synthRef.current?.destroy();
+      audio.pause();
+      audio.src = '';
+      audioRef.current = null;
     };
   }, []);
 
+  // Auto-play when card opens (after spike/transition)
+  useEffect(() => {
+    if (!autoPlay || hasStartedRef.current) return;
+    hasStartedRef.current = true;
+
+    const timer = setTimeout(() => {
+      audioRef.current?.play().catch(() => {
+        // Autoplay blocked — user can manually tap the button
+      });
+    }, 600); // slight delay so confetti lands first
+
+    return () => clearTimeout(timer);
+  }, [autoPlay]);
+
+  // Toggle play / pause
   const toggle = () => {
-    if (!synthRef.current) {
-      initSynth();
-      setTimeout(() => {
-        synthRef.current?.play();
-        setIsPlaying(true);
-      }, 100);
-      return;
-    }
+    const audio = audioRef.current;
+    if (!audio) return;
+
     if (isPlaying) {
-      synthRef.current.pause();
-      setIsPlaying(false);
+      audio.pause();
     } else {
-      synthRef.current.resume();
-      setIsPlaying(true);
+      audio.play().catch(() => {});
     }
   };
 

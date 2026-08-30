@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -15,6 +15,56 @@ import RingsIllustration from '@/components/RingsIllustration';
 
 
 type Stage = 'cover' | 'opening' | 'main';
+
+// Scroll-aware hint — shows at top, hides after 150px scroll
+function ScrollDownHint({ visible }: { visible: boolean }) {
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          key="scroll-hint"
+          className="fixed bottom-6 left-1/2 z-50 flex flex-col items-center gap-1 pointer-events-none"
+          style={{ transform: 'translateX(-50%)' }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          transition={{ duration: 0.5 }}
+        >
+          <motion.div
+            className="flex flex-col items-center gap-1"
+            animate={{ y: [0, 7, 0] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <span
+              style={{
+                fontSize: '0.52rem',
+                letterSpacing: '0.22em',
+                textTransform: 'uppercase',
+                color: 'rgba(212,175,55,0.55)',
+                fontFamily: 'inherit',
+              }}
+            >
+              scroll
+            </span>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+              stroke="rgba(212,175,55,0.75)" strokeWidth="1.6"
+              strokeLinecap="round" strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+              stroke="rgba(212,175,55,0.3)" strokeWidth="1.6"
+              strokeLinecap="round" strokeLinejoin="round"
+              style={{ marginTop: -10 }}
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
 
 // Confetti burst particles on reveal
 function ConfettiBurst() {
@@ -108,6 +158,7 @@ export default function InvitationPage() {
   const [coverTapped, setCoverTapped] = useState(false);
   const [cardOpened, setCardOpened] = useState(false);
   const [guestName, setGuestName] = useState<string | null>(null);
+  const [showScrollHint, setShowScrollHint] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
 
 
@@ -123,12 +174,25 @@ export default function InvitationPage() {
     setStage('opening');
   };
 
-  const handleTransitionComplete = () => {
+  const handleTransitionComplete = useCallback(() => {
     setStage('main');
     setCardOpened(true);
     setShowConfetti(true);
+    // Show scroll hint after card opens
+    setTimeout(() => setShowScrollHint(true), 1200);
     setTimeout(() => setShowConfetti(false), 4000);
-  };
+  }, []);
+
+  // Track scroll to show/hide the hint
+  useEffect(() => {
+    if (stage !== 'main') return;
+    const THRESHOLD = 150;
+    const onScroll = () => {
+      setShowScrollHint(window.scrollY < THRESHOLD);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [stage]);
 
   return (
     <LanguageProvider>
@@ -149,6 +213,9 @@ export default function InvitationPage() {
 
         {/* Music player — auto-starts when card opens */}
         <MusicPlayer triggerPlay={coverTapped} autoPlay={cardOpened} />
+
+        {/* Scroll down hint — only on main stage, hides after scrolling */}
+        {stage === 'main' && <ScrollDownHint visible={showScrollHint} />}
 
         {/* ── STAGE: COVER ── */}
         <AnimatePresence mode="wait">

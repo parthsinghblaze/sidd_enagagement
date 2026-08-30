@@ -6,6 +6,19 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 
 
+// Pre-compute sunburst ray coordinates ONCE at module load so SSR and client
+// produce identical values — prevents React hydration mismatch from
+// floating-point differences between Node.js and V8 in the browser.
+const SUNBURST_RAYS = Array.from({ length: 12 }, (_, i) => {
+  const angle = (i * Math.PI * 2) / 12;
+  return {
+    x1: parseFloat((40 + 36 * Math.cos(angle)).toFixed(4)),
+    y1: parseFloat((40 + 36 * Math.sin(angle)).toFixed(4)),
+    x2: parseFloat((40 + 32 * Math.cos(angle)).toFixed(4)),
+    y2: parseFloat((40 + 32 * Math.sin(angle)).toFixed(4)),
+  };
+});
+
 // Traditional Auspicious Gold Ganesha Motif
 function GoldGaneshaMotif() {
   return (
@@ -26,15 +39,10 @@ function GoldGaneshaMotif() {
         </filter>
       </defs>
 
-      {/* Sunburst rays */}
-      {Array.from({ length: 12 }).map((_, i) => {
-        const angle = (i * Math.PI * 2) / 12;
-        const x1 = 40 + 36 * Math.cos(angle);
-        const y1 = 40 + 36 * Math.sin(angle);
-        const x2 = 40 + 32 * Math.cos(angle);
-        const y2 = 40 + 32 * Math.sin(angle);
-        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="url(#ganeshaGold)" strokeWidth="0.8" opacity="0.5" />;
-      })}
+      {/* Sunburst rays — use pre-computed static coords to avoid SSR/client mismatch */}
+      {SUNBURST_RAYS.map((ray, i) => (
+        <line key={i} x1={ray.x1} y1={ray.y1} x2={ray.x2} y2={ray.y2} stroke="url(#ganeshaGold)" strokeWidth="0.8" opacity="0.5" />
+      ))}
 
       {/* Outer halo circle */}
       <circle cx="40" cy="40" r="32" fill="none" stroke="url(#ganeshaGold)" strokeWidth="0.8" strokeDasharray="3 2" opacity="0.6" />
